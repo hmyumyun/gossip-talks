@@ -8,7 +8,7 @@ import javax.persistence.*;
 public class Gossip {
 
   @Id
- // @GeneratedValue
+  @GeneratedValue
   private String id;
   private String content; // validate content ???, max.length=255 and  !!! no HTML
   private OffsetDateTime dateTime;
