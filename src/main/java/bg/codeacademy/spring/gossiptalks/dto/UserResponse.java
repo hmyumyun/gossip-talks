@@ -1,13 +1,14 @@
 package bg.codeacademy.spring.gossiptalks.dto;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 public class UserResponse {
 
-  @NotNull
+
+  @NotEmpty
   private String email;
-  @NotNull
+  @NotEmpty
   @Pattern(regexp = "^[a-z0-8\\\\.\\\\-]+$")
   private String username;
   private String name;

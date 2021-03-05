@@ -3,7 +3,6 @@ package bg.codeacademy.spring.gossiptalks.model;
 import java.time.OffsetDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.*;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -11,7 +10,7 @@ public class User {
 
   @Id
   @GeneratedValue
-  private String id;
+  private long id;
   private String fullName;
 
   @NotNull
@@ -26,15 +25,27 @@ public class User {
   private OffsetDateTime lastLoginTime;
   @NotNull
   private OffsetDateTime registrationTime;
+  // @Column(name = "email", nullable = false, length = 200)
   private String email; // validations !!!
 
-  private List<User> friendList;
+  public boolean isFollow() {
+    return following;
+  }
 
-  public String getId() {
+  public User setFollow(boolean follow) {
+    this.following = follow;
+    return this;
+  }
+
+  //added from hakan
+  private boolean following;
+  // private List<User> friendList;
+
+  public long getId() {
     return id;
   }
 
-  public User setId(String id) {
+  public User setId(long id) {
     this.id = id;
     return this;
   }
@@ -93,23 +104,25 @@ public class User {
     return this;
   }
 
-  public List<User> getFriendList() {
-    return friendList;
-  }
-
-  public User setFriendList(List<User> friendList) {
-    this.friendList = friendList;
-    return this;
-  }
+//  public List<User> getFriendList() {
+//    return friendList;
+//  }
+//
+//  public User setFriendList(List<User> friendList) {
+//    this.friendList = friendList;
+//    return this;
+//  }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
+    if (this == o) {
       return true;
-    if (!(o instanceof User))
+    }
+    if (!(o instanceof User)) {
       return false;
+    }
     User user = (User) o;
-    return getId().equals(user.getId());
+    return getId() == (user.getId());
   }
 
   @Override
