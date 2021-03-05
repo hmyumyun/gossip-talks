@@ -8,8 +8,8 @@ import javax.persistence.*;
 public class Gossip {
 
   @Id
- // @GeneratedValue
-  private String id;
+  @GeneratedValue
+  private long id;
   private String content; // validate content ???, max.length=255 and  !!! no HTML
   private OffsetDateTime dateTime;
 
@@ -18,11 +18,11 @@ public class Gossip {
   private User user;
 // ???private long likeCounter;
 
-  public String getId() {
+  public long getId() {
     return id;
   }
 
-  public Gossip setId(String id) {
+  public Gossip setId(long id) {
     this.id = id;
     return this;
   }
@@ -56,12 +56,14 @@ public class Gossip {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
+    if (this == o) {
       return true;
-    if (!(o instanceof Gossip))
+    }
+    if (!(o instanceof Gossip)) {
       return false;
+    }
     Gossip gossip = (Gossip) o;
-    return getId().equals(gossip.getId());
+    return getId() == (gossip.getId());
   }
 
   @Override

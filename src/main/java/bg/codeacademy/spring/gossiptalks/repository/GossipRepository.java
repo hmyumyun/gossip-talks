@@ -7,7 +7,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 
 @RepositoryRestResource
-public interface GossipRepository extends JpaRepository<Gossip, String> {
+public interface GossipRepository extends JpaRepository<Gossip, Long> {
 
-  Optional<Gossip> findByUsername(String id);
+
 }
