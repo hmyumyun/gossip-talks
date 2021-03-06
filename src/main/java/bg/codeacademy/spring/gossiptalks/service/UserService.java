@@ -9,12 +9,15 @@ import javax.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService //implements UserDetailsService {
-{
+public class UserService implements UserDetailsService {
+
 
   private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
@@ -24,38 +27,43 @@ public class UserService //implements UserDetailsService {
     this.passwordEncoder = passwordEncoder;
     this.userRepository = userRepository;
   }
-//i don't know how to implement logic here
-//  @Override
-//  public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-//    Optional<User> user = userRepository.findByUsername(s);
-//    User realUser=user.get();
-//    realUser.setLastLoginTime(OffsetDateTime.now());
-//    return realUser;
-//  }
+
+  @Override
+  public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+//    return userRepository.findByUsername(s)
+//        .orElseThrow(() ->new UsernameNotFoundException("Not found"));
+    Optional<User> user = userRepository.findByUsername(s);
+    User realUser = user.get();
+    realUser.setLastLoginTime(OffsetDateTime.now());
+    userRepository.save(realUser);
+    return realUser;
+  }
   //  връща всички user
 
-  public Page<User> listAllUsers(int pageNo, int pageSize, boolean follow) {
+  public Page<User> listAllUsers(int pageNo, int pageSize, String name, boolean follow) {
     // sorting - wrong !!!
     Pageable paging = PageRequest.of(pageNo, pageSize);
 
-    if (follow) {
-      return userRepository.findByFollowTrue(paging);
-    } else {
+    if (name == null) {
       return userRepository.findAll(paging);
-    }
-  }
-
-  public Page<User> listMatchingUsers(int pageNo, int pageSize, @NotEmpty String name,
-      boolean follow) {
-    // sorting - wrong !!!
-    Pageable paging = PageRequest.of(pageNo, pageSize);
-
-    if (follow) {
-      return userRepository.findByFollowTrueAndUsernameContainingIgnoreCase(name, paging);
     } else {
       return userRepository.findByUsernameContainingIgnoreCase(name, paging);
     }
+
   }
+
+
+//  public Page<User> listMatchingUsers(int pageNo, int pageSize, @NotEmpty String name,
+//      boolean follow) {
+//    // sorting - wrong !!!
+//    Pageable paging = PageRequest.of(pageNo, pageSize);
+//
+//    if (follow) {
+//      return userRepository.findByFollowTrueAndUsernameContainingIgnoreCase(name, paging);
+//    } else {
+//      return userRepository.findByUsernameContainingIgnoreCase(name, paging);
+//    }
+//  }
 
   public User register(@NotEmpty String email, String fullName, @NotEmpty String username,
       @NotEmpty String password,
@@ -71,7 +79,6 @@ public class UserService //implements UserDetailsService {
     user.setFullName(fullName);
     user.setUsername(username);
     user.setPassword(passwordEncoder.encode(password));
-    user.setFollow(follow);
     user.setRegistrationTime(OffsetDateTime.now());
     return userRepository.save(user);
   }
@@ -81,28 +88,35 @@ public class UserService //implements UserDetailsService {
 
   }
 
-  public User changePassword(User user, String oldPassword, String newPassword) {
+  public User changePassword(User user, String oldPassword, String newPassword, String
+      newPasswordConfirmation) {
     String currentHash = user.getPassword();
-    if (!passwordEncoder.matches(oldPassword, newPassword)) {
-      throw new IllegalArgumentException("The password doesn't match");
+    if (!passwordEncoder.matches(oldPassword, currentHash)) {
+      throw new IllegalArgumentException("The current password doesn't match");
     }
-    if (passwordEncoder.matches(currentHash, newPassword)) {
+    if (passwordEncoder.matches(newPassword, currentHash)) {
       throw new IllegalArgumentException("The passwords are the same");
+    }
+    if (!newPassword.equals(newPasswordConfirmation)) {
+      throw new IllegalArgumentException("The password confirmation doesn't match");
     }
     user.setPassword(passwordEncoder.encode(newPassword));
     return userRepository.save(user);
   }
-//  public void createGossip(User user, String content) {
-//  }
-//
-//  //дпбавя user2 въвg friendList на user1
-//  public void followUser(User user1, User user2)
-//
-//  //връща всички госипи от даден user
-//  public List<Gossip> readAllGossips(User user) {
-//  }
-//
-//  //всички госипи на всички приятели
-//  public List<Gossip> readAllFriendsGossips() {
-//  }
+
+  public User followUser(User current, String username, boolean toFollow) {
+    User user = userRepository.findByUsername(username).get();
+    if (user == null) {
+      throw new UsernameNotFoundException("Not Found!");
+    }
+    if (toFollow) {
+      // add user to followers
+      // ??? password added  to following list !!!!!
+      current.getFriendList().add(user);
+    } else {
+      // remove From followers
+      current.getFriendList().remove(user);
+    }
+    return userRepository.save(current);
+  }
 }

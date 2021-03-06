@@ -1,5 +1,6 @@
 package bg.codeacademy.spring.gossiptalks.dto;
 
+import bg.codeacademy.spring.gossiptalks.model.User;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
@@ -16,6 +17,16 @@ public class UserResponse {
 
   public String getEmail() {
     return email;
+  }
+
+
+  public UserResponse setFollowing(User current, User target) {
+    if (current.getFriendList().contains(target)) {
+      this.following = true;
+    } else {
+      this.following = false;
+    }
+    return this;
   }
 
   public UserResponse setEmail(String email) {
