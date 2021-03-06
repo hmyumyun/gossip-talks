@@ -1,5 +1,6 @@
 package bg.codeacademy.spring.gossiptalks.config;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,11 +29,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .httpBasic()
         /**/.and()
         .logout()
-        /**/.and();
-//        .authorizeRequests()
-//        /**/.antMatchers("/h2-console/**").permitAll()
-//        /**/.antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-//        /**/.antMatchers("/**").authenticated();
+        /**/.and()
+        .authorizeRequests()
+        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+        /**/.antMatchers("/h2-console/**").permitAll()
+        /**/.antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+        /**/.antMatchers("/**").authenticated();
+
   }
 
   @Bean
