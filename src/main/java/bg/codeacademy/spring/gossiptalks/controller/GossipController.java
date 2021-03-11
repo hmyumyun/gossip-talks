@@ -1,0 +1,101 @@
+package bg.codeacademy.spring.gossiptalks.controller;
+
+import bg.codeacademy.spring.gossiptalks.dto.GossipList;
+import bg.codeacademy.spring.gossiptalks.dto.GossipResponse;
+import bg.codeacademy.spring.gossiptalks.model.Gossip;
+import bg.codeacademy.spring.gossiptalks.model.User;
+import bg.codeacademy.spring.gossiptalks.service.GossipService;
+import bg.codeacademy.spring.gossiptalks.service.UserService;
+import java.security.Principal;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotEmpty;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import retrofit2.http.Multipart;
+
+@RestController
+@RequestMapping("/api/v1")
+@Validated
+public class GossipController {
+
+  private final GossipService gossipService;
+  private final UserService userService;
+
+  public GossipController(GossipService gossipService,
+      UserService userService) {
+    this.gossipService = gossipService;
+    this.userService = userService;
+  }
+
+  @Multipart
+  @PostMapping(value = "/gossips", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public GossipResponse publishGossip(
+      @NotEmpty @RequestParam(name = "text") String content, Principal principal
+  ) {
+    User currentUser = userService.getCurrentUser(principal.getName());
+    Gossip gossip = gossipService.createGossip(currentUser, content);
+    return new GossipResponse()
+        .setText(gossip.getContent())
+        .setIdFromGossipEntity(gossip.getId())
+        .setUsername(currentUser.getUsername())
+        .setDatetime(OffsetDateTime.now());
+
+  }
+
+
+  @GetMapping(value = "/gossips")
+  public GossipList getGossipOfFriends(
+      @RequestParam(name = "pageNo", required = false, defaultValue = "0") int pageNumber,
+      @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize,
+      Principal principal) {
+    User currentUser = userService.getCurrentUser(principal.getName());
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    Page<Gossip> gossips = gossipService
+        .getAllGossipsOfFriends(currentUser, pageable);
+
+    List<GossipResponse> gossipResponses = gossips.stream().map(user -> new GossipResponse()
+        .setText(user.getContent())
+        .setIdFromGossipEntity(user.getId())
+        .setUsername(user.getUser().getUsername())
+        .setDatetime(user.getDateTime())).collect(Collectors.toList());
+
+    return new GossipList()
+        .setPageNumber(pageNumber)
+        .setPageSize(pageSize)
+        .setTotal((int) (gossips.getTotalElements()))
+        .setCount(gossips.getNumberOfElements())
+        .setContent(gossipResponses);
+  }
+
+  @GetMapping(value = "users/{username}/gossips")
+  public GossipList getGossipOfGivenUsername(
+      @RequestParam(name = "pageNo", required = false, defaultValue = "0") int pageNumber,
+      @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize,
+      @PathVariable("username") String username) {
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    Page<Gossip> gossips = gossipService.getAllGossipFromGivenUser(username, pageable);
+    List<GossipResponse> gossipResponses = gossips.stream().map(user -> new GossipResponse()
+        .setText(user.getContent())
+        .setIdFromGossipEntity(user.getId())
+        .setUsername(user.getUser().getUsername())
+        .setDatetime(user.getDateTime())).collect(Collectors.toList());
+
+    return new GossipList()
+        .setPageNumber(pageNumber)
+        .setPageSize(pageSize)
+        .setTotal((int) gossips.getTotalElements())
+        .setCount(gossips.getNumberOfElements())
+        .setContent(gossipResponses);
+  }
+}

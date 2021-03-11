@@ -2,11 +2,10 @@ package bg.codeacademy.spring.gossiptalks.dto;
 
 import java.util.List;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+
 
 public class GossipList {
 
-  @Size(min = 0)
   @NotNull
   private int pageNumber;
   @NotNull
@@ -16,7 +15,7 @@ public class GossipList {
   @NotNull
   private int total;
   @NotNull
-  private List<Gossip> content;
+  private List<GossipResponse> content;
 
   public int getPageNumber() {
     return pageNumber;
@@ -54,11 +53,11 @@ public class GossipList {
     return this;
   }
 
-  public List<Gossip> getContent() {
+  public List<GossipResponse> getContent() {
     return content;
   }
 
-  public GossipList setContent(List<Gossip> content) {
+  public GossipList setContent(List<GossipResponse> content) {
     this.content = content;
     return this;
   }
