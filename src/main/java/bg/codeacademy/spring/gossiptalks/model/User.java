@@ -3,6 +3,7 @@ package bg.codeacademy.spring.gossiptalks.model;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
@@ -32,7 +33,20 @@ public class User implements UserDetails {
   private OffsetDateTime lastLoginTime;
   @NotNull
   private OffsetDateTime registrationTime;
-  // @Column(name = "email", nullable = false, length = 200)
+  //added by haki
+
+  public long getGossipsCounter() {
+    return gossipsCounter;
+  }
+
+  public User IncrementGossipsCounter() {
+    gossipsCounter++;
+    return this;
+  }
+
+
+  private long gossipsCounter;
+
   private String email; // validations !!!
 
   //added from hakan
@@ -89,7 +103,7 @@ public class User implements UserDetails {
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
 
-    return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+    return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
   }
 
@@ -121,9 +135,9 @@ public class User implements UserDetails {
   }
 
   public User() {
+
   }
 
-  ;
 
   public String getEmail() {
     return email;

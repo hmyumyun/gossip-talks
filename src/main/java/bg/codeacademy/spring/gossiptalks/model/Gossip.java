@@ -16,7 +16,7 @@ public class Gossip {
   // This create Many-to-One relation to User
   @ManyToOne
   private User user;
-// ???private long likeCounter;
+
 
   public long getId() {
     return id;
