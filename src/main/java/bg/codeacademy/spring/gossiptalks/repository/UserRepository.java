@@ -15,10 +15,6 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
 
 
-  //  Page<User> findByFollowTrue(Pageable pageable);
-//
-//  Page<User> findByFollowTrueAndUsernameContainingIgnoreCase(String username, Pageable pageable);
-//
   Page<User> findByUsernameContainingIgnoreCase(String username, Pageable pageable);
 
   Optional<User> findByUsername(String username);

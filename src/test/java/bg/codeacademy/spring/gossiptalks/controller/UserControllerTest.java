@@ -1,62 +1,200 @@
 package bg.codeacademy.spring.gossiptalks.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.oneOf;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
-import bg.codeacademy.spring.gossiptalks.model.User;
 import bg.codeacademy.spring.gossiptalks.repository.UserRepository;
-import bg.codeacademy.spring.gossiptalks.service.UserService;
+import io.restassured.RestAssured;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@ContextConfiguration
+@ActiveProfiles("dev")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerTest {
 
-  @Autowired
-  private MockMvc mvc;
+  private static final String DEFAULT_PASS = "User123!";
+
+  // get the random port, used by the spring application
+  @LocalServerPort
+  int port;
 
   @Autowired
-  private UserService userService;
-  @Autowired
-  private UserRepository userRepository;
-
-
-  private User testUser;
-  String pass = "UserTest1!";
+  UserRepository userRepository;
 
   @BeforeEach
-  void setUp() {
-    testUser = userService.register("user@abv.bg", "User User", "userTest", pass, pass, false);
+  public void beforeEachTest() {
+    // init port and logging
+    RestAssured.port = port;
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
   }
 
   @AfterEach
-  void tearDown() {
+  public void afterEachTest() {
+    RestAssured.reset();
     userRepository.deleteAll();
   }
 
-  // ask Valyo ???
+
   @Test
-  @WithAnonymousUser
-  void given_mismatching_passwords_When_register_user_Then_fail() throws Exception {
-    mvc.perform(post("/api/v1/users")
-        .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .accept(MediaType.APPLICATION_JSON_VALUE)
-        .content(
-            "{\"email\":\"haki@abv.bg\",\"fullName\":\"Hakan Myumyun\", \"username\":\"haki97\","
-                + "\"password\":\"Haki123!\",\"passwordConfirmation\":\"Haki1234!\""))
-        .andDo(print())
-        .andExpect(status().isInternalServerError());
+  // invalid username
+  // OK.value-200
+  // CREATED.value - 201
+  public void createUser_with_InvalidUsername_should_fail() {
+    given()
+        .multiPart("email", "user@abv.bg")
+        .multiPart("username", "user97")
+        .multiPart("password", DEFAULT_PASS)
+        .multiPart("passwordConfirmation", DEFAULT_PASS)
+        .when()
+        .post("api/v1/users")
+        .then()
+        .statusCode(not(oneOf(OK.value(), CREATED.value())));
+  }
+
+  @Test
+  // create valid user
+  public void createUser_with_ValidUsername_should_success() {
+    given()
+        .multiPart("email", "user@abv.bg")
+        .multiPart("username", "user11")
+        .multiPart("password", DEFAULT_PASS)
+        .multiPart("passwordConfirmation", DEFAULT_PASS)
+        .when()
+        .post("api/v1/users")
+        .then()
+        .statusCode(OK.value());
+
+  }
+
+  @Test
+  // create Invalid user
+  public void createUser_with_ExistingUsername_should_fail() {
+
+    //first user - success
+    given()
+        .multiPart("email", "testexistinguser@abv.bg")
+        .multiPart("username", "testexistinguser")
+        .multiPart("password", DEFAULT_PASS)
+        .multiPart("passwordConfirmation", DEFAULT_PASS)
+        .when()
+        .post("api/v1/users")
+        .then()
+        .statusCode((oneOf(OK.value(), CREATED.value())));
+
+    given()
+        .multiPart("email", "testexistinguser@abv.bg")
+        .multiPart("username", "testexistinguser")
+        .multiPart("password", DEFAULT_PASS)
+        .multiPart("passwordConfirmation", DEFAULT_PASS)
+        .when()
+        .post("api/v1/users")
+        .then()
+        .statusCode(not(oneOf(OK.value(), CREATED.value())));
+  }
+
+  @Test
+  //missmatching password and passwordConfirmation
+  public void createUser_with_MismatchingPassword_should_fail() {
+    given()
+        .multiPart("email", "haki@abv.bg")
+        .multiPart("username", "user2")
+        .multiPart("password", DEFAULT_PASS.concat("a"))
+        .multiPart("passwordConfirmation", DEFAULT_PASS)
+        .when()
+        .post("api/v1/users")
+        .then()
+        .statusCode(not(oneOf(OK.value(), CREATED.value())));
+  }
+
+  @Test
+  public void changePasswordOfCurrentUser_when_Authenticated_should_Pass() {
+    createValidUser("fiko");
+    given()
+        .auth()
+        .basic("fiko", DEFAULT_PASS)
+        .multiPart("password", "Fiko123!")
+        .multiPart("passwordConfirmation", "Fiko123!")
+        .multiPart("oldPassword", DEFAULT_PASS)
+        .when()
+        .post("api/v1/users/me")
+        .then()
+        .statusCode(OK.value());
+
+  }
+
+  @Test
+  // mismatcging password and passwordConfirmation
+  public void changePasswordOfCurrentUser_when_MismatchingPassword_should_Fail() {
+    createValidUser("niko");
+    given()
+        .auth()
+        .basic("niko", DEFAULT_PASS)
+        .multiPart("password", "Niko123!")
+        .multiPart("passwordConfirmation", "Niko1234!")
+        .multiPart("oldPassword", DEFAULT_PASS)
+        .when()
+        .post("api/v1/users/me")
+        .then()
+        .statusCode(not(oneOf(OK.value(), CREATED.value())));
+
+  }
+
+  @Test
+  // mismatcging oldPassword
+  public void changePasswordOfCurrentUser_when_MismatchingOldPassword_should_Fail() {
+    createValidUser("ivan1");
+    given()
+        .auth()
+        .basic("ivan1", DEFAULT_PASS)
+        .multiPart("password", "Ivan123!")
+        .multiPart("passwordConfirmation", "Ivan123!")
+        .multiPart("oldPassword", DEFAULT_PASS + "a")
+        .when()
+        .post("api/v1/users/me")
+        .then()
+        .statusCode(not(oneOf(OK.value(), CREATED.value())));
+
+  }
+
+  @Test
+  // old password and new password are the same
+  public void changePasswordOfCurrentUser_when_OldPasswordAndNewPasswordAreTheSame_should_Fail() {
+    createValidUser("jhonny");
+    given()
+        .auth()
+        .basic("jhonny", DEFAULT_PASS)
+        .multiPart("password", DEFAULT_PASS)
+        .multiPart("passwordConfirmation", DEFAULT_PASS)
+        .multiPart("oldPassword", DEFAULT_PASS)
+        .when()
+        .post("api/v1/users/me")
+        .then()
+        .statusCode(not(oneOf(OK.value(), CREATED.value())));
+
+  }
+
+  private void createValidUser(String name) {
+    given()
+        // prepare
+        .multiPart("email", name + "@mail.com")
+        .multiPart("username", name)//'^[a-z0-8\\.\\-]+$'
+        .multiPart("name", name)
+        .multiPart("password", DEFAULT_PASS)
+        .multiPart("passwordConfirmation", DEFAULT_PASS)
+        // do
+        .when()
+        .post("/api/v1/users")
+        // test
+        .then()
+        .statusCode(oneOf(OK.value(), CREATED.value()));
   }
 }

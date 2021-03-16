@@ -21,12 +21,14 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import retrofit2.http.Multipart;
@@ -55,26 +57,6 @@ public class UserController {
 
     Collection<User> matching = userService
         .listAllUsers(pageNumber, pageSize, name, follow, currentUser);
-// move implementation from contrroler to service !!!
-//    if (follow) {
-//      if (name == null) {
-//        matching = currentUser.getFriendList();
-//      } else {
-//        matching = currentUser.getFriendList().stream()
-//            .filter(user -> user.getUsername().toLowerCase().contains(name.toLowerCase()))
-//            ///sorted should be implemented
-//            .skip(pageNumber * pageSize)
-//            .limit(pageSize)
-//            .collect(Collectors.toList());
-//      }
-//    } else {
-//      // remove currentUser
-//      String currentUserName = currentUser.getUsername();
-//      matching = userService.listAllUsers(pageNumber, pageSize, name, follow).
-//          stream().filter(user -> !user.getUsername().equals(currentUserName))
-//          .collect(
-//              Collectors.toList());
-//    }
 
     return matching.stream().map(user -> new UserResponse()
         .setEmail(user.getEmail())
@@ -87,7 +69,7 @@ public class UserController {
   @PostMapping(value = "/users",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public User registerUser(
-      @NotEmpty
+      @NotEmpty @Pattern(regexp = "^[a-z0-8\\\\.\\\\-]+$")
       @RequestParam(name = "username") String username,
       @RequestParam(name = "name", required = false) String name,
       @NotEmpty @Email @RequestParam(name = "email") String email,
@@ -99,15 +81,12 @@ public class UserController {
     return userService.register(email, name, username, password, passwordConfirmation, following);
   }
 
+
   @GetMapping("/users/me")
   public UserResponse getCurrentUser(Principal principal) {
     User user = userService.getCurrentUser(principal.getName());
-    return new UserResponse()
-        .setEmail(user.getEmail())
-        .setUsername(user.getUsername())
-        .setName(user.getFullName())
-        //always false, because don't follow himself
-        .setFollowing(false);
+    return convertToUserResponse(user, false);
+
   }
 
   @Multipart
@@ -117,12 +96,7 @@ public class UserController {
       Principal principal) {
     User current = userService.getCurrentUser(principal.getName());
     User target = userService.followUser(current, username, follow);
-    return new UserResponse()
-        .setEmail(target.getEmail())
-        .setUsername(target.getUsername())
-        .setName(target.getFullName())
-        .setFollowing(follow);
-
+    return convertToUserResponse(target, follow);
   }
 
   @Multipart
@@ -133,10 +107,15 @@ public class UserController {
       @NotEmpty @RequestParam(name = "oldPassword") String oldPassword, Principal principal) {
     User current = userService.getCurrentUser(principal.getName());
     userService.changePassword(current, oldPassword, password, passwordConfirmation);
-    return new UserResponse()
-        .setEmail(current.getEmail())
-        .setUsername(current.getUsername())
-        .setName(current.getFullName())
-        .setFollowing(false);
+
+    return convertToUserResponse(current, false);
+  }
+
+  public static UserResponse convertToUserResponse(User user, boolean follow) {
+    return new UserResponse().
+        setEmail(user.getEmail())
+        .setUsername(user.getUsername())
+        .setName(user.getFullName())
+        .setFollowing(follow);
   }
 }

@@ -5,7 +5,6 @@ import bg.codeacademy.spring.gossiptalks.repository.UserRepository;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -35,8 +34,6 @@ public class UserService implements UserDetailsService {
   public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
     User realUser = userRepository.findByUsername(s)
         .orElseThrow(() -> new UsernameNotFoundException("Not found"));
-//    Optional<User> user = userRepository.findByUsername(s);
-//    User realUser = user.get();
     realUser.setLastLoginTime(OffsetDateTime.now());
     userRepository.save(realUser);
     return realUser;

@@ -1,5 +1,6 @@
 package bg.codeacademy.spring.gossiptalks.dto;
 
+import bg.codeacademy.spring.gossiptalks.validation.NoHtml;
 import java.time.OffsetDateTime;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -9,6 +10,7 @@ public class GossipResponse {
 
   @NotNull
   @Size(max = 255)
+  @NoHtml
   private String text;
   @NotNull
   @Pattern(regexp = "[A-Z0-9]+")
@@ -27,7 +29,8 @@ public class GossipResponse {
     this.text = text;
     return this;
   }
-//convert id to 36-base format
+
+  //convert id to 36-base format
   public GossipResponse setIdFromGossipEntity(long id) {
     this.id = Long.toString(id, 36);
     return this;

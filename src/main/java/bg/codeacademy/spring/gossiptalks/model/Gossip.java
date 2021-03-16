@@ -1,8 +1,10 @@
 package bg.codeacademy.spring.gossiptalks.model;
 
+import bg.codeacademy.spring.gossiptalks.validation.NoHtml;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 
 @Entity
 public class Gossip {
@@ -10,7 +12,10 @@ public class Gossip {
   @Id
   @GeneratedValue
   private long id;
-  private String content; // validate content ???, max.length=255 and  !!! no HTML
+
+  @Size(min = 2, max = 255)
+  @NoHtml
+  private String content;
   private OffsetDateTime dateTime;
 
   // This create Many-to-One relation to User
@@ -22,10 +27,6 @@ public class Gossip {
     return id;
   }
 
-  public Gossip setId(long id) {
-    this.id = id;
-    return this;
-  }
 
   public String getContent() {
     return content;
@@ -54,30 +55,30 @@ public class Gossip {
     return this;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof Gossip)) {
-      return false;
-    }
-    Gossip gossip = (Gossip) o;
-    return getId() == (gossip.getId());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getId());
-  }
-
-  @Override
-  public String toString() {
-    return "Gossip{" +
-        "id='" + id + '\'' +
-        ", content='" + content + '\'' +
-        ", dateTime=" + dateTime +
-        ", user=" + user +
-        '}';
-  }
+//  @Override
+//  public boolean equals(Object o) {
+//    if (this == o) {
+//      return true;
+//    }
+//    if (!(o instanceof Gossip)) {
+//      return false;
+//    }
+//    Gossip gossip = (Gossip) o;
+//    return getId() == (gossip.getId());
+//  }
+//
+//  @Override
+//  public int hashCode() {
+//    return Objects.hash(getId());
+//  }
+//
+//  @Override
+//  public String toString() {
+//    return "Gossip{" +
+//        "id='" + id + '\'' +
+//        ", content='" + content + '\'' +
+//        ", dateTime=" + dateTime +
+//        ", user=" + user +
+//        '}';
+//  }
 }

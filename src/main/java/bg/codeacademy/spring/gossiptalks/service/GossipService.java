@@ -3,6 +3,7 @@ package bg.codeacademy.spring.gossiptalks.service;
 import bg.codeacademy.spring.gossiptalks.model.Gossip;
 import bg.codeacademy.spring.gossiptalks.model.User;
 import bg.codeacademy.spring.gossiptalks.repository.GossipRepository;
+import bg.codeacademy.spring.gossiptalks.validation.NoHtml;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +39,7 @@ public class GossipService {
 
   public Page<Gossip> getAllGossipFromGivenUser(String username, Pageable pageable) {
     Pageable paging = PageRequest
-        .of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("datetime").descending());
-    return gossipRepository.findByUserUsername(username, pageable);
+        .of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("dateTime").descending());
+    return gossipRepository.findByUserUsername(username, paging);
   }
 }
