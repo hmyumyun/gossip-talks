@@ -21,11 +21,7 @@ public class UserResponse {
 
 
   public UserResponse setFollowing(User current, User target) {
-    if (current.getFriendList().contains(target)) {
-      this.following = true;
-    } else {
-      this.following = false;
-    }
+    this.following = current.getFriendList().contains(target);
     return this;
   }
 
