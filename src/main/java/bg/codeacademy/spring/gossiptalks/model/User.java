@@ -19,11 +19,11 @@ public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
+
   private String fullName;
 
   @NotNull
-  @Size(min = 5, max = 10)
-  @Pattern(regexp = "[a-zA-Z0-9]+")
+  @Pattern(regexp = "^[a-z0-8\\\\.\\\\-]+$")
   @Column(unique = true)
   private String username;
 
@@ -152,34 +152,34 @@ public class User implements UserDetails {
     return friendList;
   }
 
-  public User setFriendList(Set<User> friendList) {
-    this.friendList = friendList;
-    return this;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof User)) {
-      return false;
-    }
-    User user = (User) o;
-    return getId() == (user.getId());
-  }
+//  public User setFriendList(Set<User> friendList) {
+//    this.friendList = friendList;
+//    return this;
+//  }
+//
+//  @Override
+//  public boolean equals(Object o) {
+//    if (this == o) {
+//      return true;
+//    }
+//    if (!(o instanceof User)) {
+//      return false;
+//    }
+//    User user = (User) o;
+//    return getId() == (user.getId());
+//  }
 
   @Override
   public int hashCode() {
     return Objects.hash(getId());
   }
 
-  @Override
-  public String toString() {
-    return "User{" +
-        "id='" + id + '\'' +
-        ", fullName='" + fullName + '\'' +
-        ", email='" + email + '\'' +
-        '}';
-  }
+//  @Override
+//  public String toString() {
+//    return "User{" +
+//        "id='" + id + '\'' +
+//        ", fullName='" + fullName + '\'' +
+//        ", email='" + email + '\'' +
+//        '}';
+//  }
 }
