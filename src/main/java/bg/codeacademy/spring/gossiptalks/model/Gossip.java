@@ -55,30 +55,21 @@ public class Gossip {
     return this;
   }
 
-//  @Override
-//  public boolean equals(Object o) {
-//    if (this == o) {
-//      return true;
-//    }
-//    if (!(o instanceof Gossip)) {
-//      return false;
-//    }
-//    Gossip gossip = (Gossip) o;
-//    return getId() == (gossip.getId());
-//  }
-//
-//  @Override
-//  public int hashCode() {
-//    return Objects.hash(getId());
-//  }
-//
-//  @Override
-//  public String toString() {
-//    return "Gossip{" +
-//        "id='" + id + '\'' +
-//        ", content='" + content + '\'' +
-//        ", dateTime=" + dateTime +
-//        ", user=" + user +
-//        '}';
-//  }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Gossip gossip = (Gossip) o;
+    return id == gossip.id && content.equals(gossip.content) && dateTime.equals(gossip.dateTime)
+        && user.equals(gossip.user);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, content, dateTime, user);
+  }
 }

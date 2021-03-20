@@ -61,5 +61,26 @@ public class PasswordValidatorTest {
     Mockito.verify(context, Mockito.times(2))
         .buildConstraintViolationWithTemplate(Mockito.anyString());
   }
+  @Test
+  public void given_invalid_password2_When_validate_Then_context_messages_set() {
+    assertFalse(this.passwordValidator.isValid("AAAA-111", context));
+    //Missing: lower case letter
+    Mockito.verify(context, Mockito.times(1))
+        .buildConstraintViolationWithTemplate(Mockito.anyString());
+  }
+  @Test
+  public void given_invalid_password3_When_validate_Then_context_messages_set() {
+    assertFalse(this.passwordValidator.isValid("aaaa-111", context));
+    //Missing: upper case letter
+    Mockito.verify(context, Mockito.times(1))
+        .buildConstraintViolationWithTemplate(Mockito.anyString());
+  }
+  @Test
+  public void given_invalid_password4_When_validate_Then_context_messages_set() {
+    assertFalse(this.passwordValidator.isValid("AAAA- 111", context));
+    //Content whitespace and lower case letter
+    Mockito.verify(context, Mockito.times(2))
+        .buildConstraintViolationWithTemplate(Mockito.anyString());
+  }
 }
 

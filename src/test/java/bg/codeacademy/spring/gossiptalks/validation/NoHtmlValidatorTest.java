@@ -39,6 +39,7 @@ class NoHtmlValidatorTest {
     return Stream.of(
         Arguments.of("Hello world", true),
         Arguments.of("group1", true),
+        Arguments.of("",false),
         Arguments.of("Contains single tag <tag/>", false),
         Arguments.of("<body id=\"wpdiscuz_5.3.5\">This is a body</body>", false),
         Arguments.of("There is <openTag></openTag> inside.", false),

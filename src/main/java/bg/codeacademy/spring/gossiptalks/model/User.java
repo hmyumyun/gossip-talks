@@ -33,13 +33,13 @@ public class User implements UserDetails {
   private OffsetDateTime lastLoginTime;
   @NotNull
   private OffsetDateTime registrationTime;
-  //added by haki
+
 
   public long getGossipsCounter() {
     return gossipsCounter;
   }
 
-  public User IncrementGossipsCounter() {
+  public User incrementGossipsCounter() {
     gossipsCounter++;
     return this;
   }
@@ -47,9 +47,8 @@ public class User implements UserDetails {
 
   private long gossipsCounter;
 
-  private String email; // validations !!!
+  private String email;
 
-  //added from hakan
   @ManyToMany
   private Set<User> friendList;
 
@@ -152,34 +151,30 @@ public class User implements UserDetails {
     return friendList;
   }
 
-//  public User setFriendList(Set<User> friendList) {
-//    this.friendList = friendList;
-//    return this;
-//  }
-//
-//  @Override
-//  public boolean equals(Object o) {
-//    if (this == o) {
-//      return true;
-//    }
-//    if (!(o instanceof User)) {
-//      return false;
-//    }
-//    User user = (User) o;
-//    return getId() == (user.getId());
-//  }
+  public User setFriendList(Set<User> friendList) {
+    this.friendList = friendList;
+    return this;
+  }
+
 
   @Override
   public int hashCode() {
     return Objects.hash(getId());
   }
 
-//  @Override
-//  public String toString() {
-//    return "User{" +
-//        "id='" + id + '\'' +
-//        ", fullName='" + fullName + '\'' +
-//        ", email='" + email + '\'' +
-//        '}';
-//  }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    User user = (User) o;
+    return id == user.id && gossipsCounter == user.gossipsCounter && fullName.equals(user.fullName)
+        && username.equals(user.username) && password.equals(user.password) && Objects
+        .equals(lastLoginTime, user.lastLoginTime) && Objects
+        .equals(registrationTime, user.registrationTime) && email.equals(user.email)
+        && Objects.equals(friendList, user.friendList);
+  }
 }
