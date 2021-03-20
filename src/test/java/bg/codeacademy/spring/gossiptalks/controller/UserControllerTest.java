@@ -1,6 +1,7 @@
 package bg.codeacademy.spring.gossiptalks.controller;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.oneOf;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -179,6 +180,42 @@ public class UserControllerTest {
         .post("api/v1/users/me")
         .then()
         .statusCode(not(oneOf(OK.value(), CREATED.value())));
+
+  }
+
+  @Test
+  public void getListusers_when_authenticated_should_pass() {
+    createValidUser("userfollow1");
+    createValidUser("userfollow2");
+    // userfollow1 follow userfollow2
+    given()
+        .multiPart("follow", "true")
+        // auth
+        .auth()
+        .basic("userfollow1", DEFAULT_PASS)
+        // do
+        .when()
+        .post("/api/v1/users/userfollow2/follow")
+        // test
+        .then()
+        .statusCode(OK.value())
+        .body("username", is("userfollow2"))
+        .body("following", is(true));
+
+    given()
+        // auth
+        .auth()
+        .basic("userfollow1", DEFAULT_PASS)
+        // do
+        .when()
+        .get("/api/v1/users")
+        // test
+        .then()
+        .statusCode(OK.value())
+        .body("[0].email", is("userfollow2@mail.com"))
+        .body("[0].username", is("userfollow2"))
+        .body("[0].name", is("userfollow2"))
+        .body("[0].following", is(true));
 
   }
 

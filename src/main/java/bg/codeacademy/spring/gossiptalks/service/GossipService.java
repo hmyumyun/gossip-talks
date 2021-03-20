@@ -3,6 +3,7 @@ package bg.codeacademy.spring.gossiptalks.service;
 import bg.codeacademy.spring.gossiptalks.model.Gossip;
 import bg.codeacademy.spring.gossiptalks.model.User;
 import bg.codeacademy.spring.gossiptalks.repository.GossipRepository;
+import bg.codeacademy.spring.gossiptalks.repository.UserRepository;
 import bg.codeacademy.spring.gossiptalks.validation.NoHtml;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -17,9 +18,12 @@ import org.springframework.stereotype.Service;
 public class GossipService {
 
   private GossipRepository gossipRepository;
+  private UserRepository userRepository;
 
-  public GossipService(GossipRepository gossipRepository) {
+  public GossipService(GossipRepository gossipRepository,
+      UserRepository userRepository) {
     this.gossipRepository = gossipRepository;
+    this.userRepository = userRepository;
   }
 
   public Gossip createGossip(User user, String content) {
@@ -27,7 +31,8 @@ public class GossipService {
     gossip.setContent(content);
     gossip.setDateTime(OffsetDateTime.now());
     gossip.setUser(user);
-    user.IncrementGossipsCounter();
+    user.incrementGossipsCounter();
+    userRepository.save(user);
     return gossipRepository.save(gossip);
   }
 
