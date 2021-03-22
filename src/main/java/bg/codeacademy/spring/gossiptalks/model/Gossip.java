@@ -4,6 +4,8 @@ import bg.codeacademy.spring.gossiptalks.validation.NoHtml;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
@@ -16,11 +18,13 @@ public class Gossip {
   @Size(min = 2, max = 255)
   @NoHtml
   private String content;
+  @NotNull
   private OffsetDateTime dateTime;
 
   // This create Many-to-One relation to User
   @ManyToOne
-  private User user;
+  @NotNull
+  private User user; // TODO: rename to author, creator, publisher
 
 
   public long getId() {

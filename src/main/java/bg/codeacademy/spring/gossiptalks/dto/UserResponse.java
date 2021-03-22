@@ -20,6 +20,7 @@ public class UserResponse {
   }
 
 
+  // FIXME: don't mix domain models/dtos with logic
   public UserResponse setFollowing(User current, User target) {
     this.following = current.getFriendList().contains(target);
     return this;

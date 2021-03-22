@@ -30,14 +30,6 @@
     </dependency>
     <!-- added from hakan -->
     <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-rest-hal-explorer</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-thymeleaf</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
@@ -46,10 +38,7 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-rest</artifactId>
-    </dependency>
+    <!-- FIXME: should be used by spring, find another way, remove that -->
     <dependency>
       <groupId>com.squareup.retrofit2</groupId>
       <artifactId>retrofit</artifactId>
@@ -74,13 +63,6 @@
       <version>3.25.0</version>
     </dependency>
 
-    <!-- automatically validate requests against openapi schema -->
-    <dependency>
-      <groupId>com.atlassian.oai</groupId>
-      <artifactId>swagger-request-validator-springmvc</artifactId>
-      <version>2.10.0</version>
-    </dependency>
-
     <!-- testing dependencies -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -97,16 +79,6 @@
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <version>3.3.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-rest-core</artifactId>
-      <version>3.4.3</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -11,6 +11,8 @@ import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,8 +35,7 @@ public class GossipController {
   private final GossipService gossipService;
   private final UserService userService;
 
-  public GossipController(GossipService gossipService,
-      UserService userService) {
+  public GossipController(GossipService gossipService, UserService userService) {
     this.gossipService = gossipService;
     this.userService = userService;
   }
@@ -44,7 +45,7 @@ public class GossipController {
   public GossipResponse publishGossip(
       @NotEmpty @NoHtml @RequestParam(name = "text") String content, Principal principal
   ) {
-    User currentUser = userService.getCurrentUser(principal.getName());
+    User currentUser = userService.getGivenUser(principal.getName());
     Gossip gossip = gossipService.createGossip(currentUser, content);
     return toGossipDto(gossip, currentUser);
 
@@ -53,17 +54,17 @@ public class GossipController {
 
   @GetMapping(value = "/gossips")
   public GossipList getGossipOfFriends(
-      @RequestParam(name = "pageNo", required = false, defaultValue = "0") int pageNumber,
-      @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize,
+     @Min(0) @RequestParam(name = "pageNo", required = false, defaultValue = "0") int pageNumber,
+     @Min(0) @Max(50) @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize,
       Principal principal) {
-    User currentUser = userService.getCurrentUser(principal.getName());
+    User currentUser = userService.getGivenUser(principal.getName());
     Pageable pageable = PageRequest.of(pageNumber, pageSize);
     Page<Gossip> gossips = gossipService
         .getAllGossipsOfFriends(currentUser, pageable);
     return toGossiplistDto(pageable, gossips);
   }
 
-  @GetMapping(value = "users/{username}/gossips")
+  @GetMapping(value = "/users/{username}/gossips")
   public GossipList getGossipOfGivenUsername(
       @RequestParam(name = "pageNo", required = false, defaultValue = "0") int pageNumber,
       @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize,
@@ -83,11 +84,9 @@ public class GossipController {
   }
 
   public static GossipList toGossiplistDto(Pageable pageable, Page<Gossip> gossips) {
-    List<GossipResponse> gossipResponses = gossips.stream().map(user -> new GossipResponse()
-        .setText(user.getContent())
-        .setIdFromGossipEntity(user.getId())
-        .setUsername(user.getUser().getUsername())
-        .setDatetime(user.getDateTime())).collect(Collectors.toList());
+    List<GossipResponse> gossipResponses = gossips.stream()
+        .map(gossip -> toGossipDto(gossip, gossip.getUser()))
+        .collect(Collectors.toList());
 
     return new GossipList()
         .setPageNumber(pageable.getPageNumber())

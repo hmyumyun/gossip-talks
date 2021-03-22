@@ -13,24 +13,25 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class GossipService {
 
   private GossipRepository gossipRepository;
   private UserRepository userRepository;
 
-  public GossipService(GossipRepository gossipRepository,
-      UserRepository userRepository) {
+  public GossipService(GossipRepository gossipRepository, UserRepository userRepository) {
     this.gossipRepository = gossipRepository;
     this.userRepository = userRepository;
   }
 
   public Gossip createGossip(User user, String content) {
-    Gossip gossip = new Gossip();
-    gossip.setContent(content);
-    gossip.setDateTime(OffsetDateTime.now());
-    gossip.setUser(user);
+    Gossip gossip = new Gossip()
+        .setContent(content)
+        .setDateTime(OffsetDateTime.now())
+        .setUser(user);
     user.incrementGossipsCounter();
     userRepository.save(user);
     return gossipRepository.save(gossip);
@@ -43,6 +44,7 @@ public class GossipService {
   }
 
   public Page<Gossip> getAllGossipFromGivenUser(String username, Pageable pageable) {
+    // FIXME: remove duplicate pageable, leave Sort.b() declaration to controller
     Pageable paging = PageRequest
         .of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("dateTime").descending());
     return gossipRepository.findByUserUsername(username, paging);
