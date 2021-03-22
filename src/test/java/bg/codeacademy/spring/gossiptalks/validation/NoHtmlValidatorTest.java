@@ -27,12 +27,7 @@ class NoHtmlValidatorTest {
   @ParameterizedTest
   @MethodSource("provideValuesForIsValid")
   void is_Valid(String input, boolean expected) {
-    if (expected) {
-      assertTrue(noHtmlValidator.isValid(input, context));
-    } else {
-      assertFalse(noHtmlValidator.isValid(input, context));
-    }
-
+    assertEquals(expected, noHtmlValidator.isValid(input, context));
   }
 
   private static Stream<Arguments> provideValuesForIsValid() {

@@ -30,10 +30,18 @@ public class User implements UserDetails {
   @NotNull
   @Size(max = 1024)
   private String password;      //password hash
+
   private OffsetDateTime lastLoginTime;
+
   @NotNull
   private OffsetDateTime registrationTime;
 
+  private long gossipsCounter;
+
+  private String email;
+
+  @ManyToMany
+  private Set<User> friendList;
 
   public long getGossipsCounter() {
     return gossipsCounter;
@@ -44,13 +52,6 @@ public class User implements UserDetails {
     return this;
   }
 
-
-  private long gossipsCounter;
-
-  private String email;
-
-  @ManyToMany
-  private Set<User> friendList;
 
   public long getId() {
     return id;
@@ -95,8 +96,9 @@ public class User implements UserDetails {
     return true;
   }
 
-  public void setUsername(String username) {
+  public User setUsername(String username) {
     this.username = username;
+    return this;
   }
 
   @Override
@@ -132,11 +134,6 @@ public class User implements UserDetails {
     this.registrationTime = registrationTime;
     return this;
   }
-
-  public User() {
-
-  }
-
 
   public String getEmail() {
     return email;
