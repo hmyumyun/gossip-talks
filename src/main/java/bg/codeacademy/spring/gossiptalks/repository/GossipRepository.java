@@ -13,16 +13,12 @@ import org.springframework.stereotype.Repository;
 public interface GossipRepository extends JpaRepository<Gossip, Long> {
 
   @Query(value = "SELECT * FROM GOSSIP g "
-      + "WHERE USER_ID IN (SELECT FRIEND_LIST_ID "
+      + "WHERE g.Author_ID IN (SELECT FRIEND_LIST_ID "
       + "FROM USER_FRIEND_LIST uf "
       + "WHERE uf.USER_ID = :user_id) "
       + "ORDER BY g.DATE_TIME DESC", nativeQuery = true)
   Page<Gossip> findAllGossipsOfFriends(@Param("user_id") Long user_id, Pageable pageable);
 
-  //  @Query(value = "SELECT * FROM USER u JOIN GOSSIP g "
-//      + "ON u.ID=g.USER_ID "
-//      + "WHERE u.USERNAME = :username "
-//      + "ORDER BY g.DATE_TIME DESC", nativeQuery = true)
-//  Page<Gossip> findGossipWithGivenUsername(@Param("username") String name, Pageable pageable);
-  Page<Gossip> findByUserUsername(String username, Pageable pageable);
+
+  Page<Gossip> findByAuthorUsername(String username, Pageable pageable);
 }

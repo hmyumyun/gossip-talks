@@ -38,48 +38,55 @@ public class UserService implements UserDetailsService {
     return userRepository.save(realUser);
   }
 
-  //listUserWithoutCurrent
-  // FIXME: GossipService, accepts Pageable, here we use pageNo, pageSize
-  // pick one of the ways, and use it consistently
-  // FIXME: too complex logic, split in more methods
-  public Collection<User> listAllUsers(int pageNo, int pageSize, String name, boolean follow,
+
+  public Collection<User> listAllUsers(Pageable pageable, String name, boolean follow,
       User currentUser) {
-    Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by("gossipsCounter").descending());
+    Pageable paging = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+        Sort.by("gossipsCounter").descending());
     Stream<User> matching;
     if (follow) {
-      if (name == null) {
-        matching = currentUser.getFriendList().stream();
-        // add thenComparing username !!!
-      } else {
-        matching = currentUser.getFriendList().stream()
-            .filter(user ->
-                user.getUsername().toLowerCase().contains(name.toLowerCase()) ||
-                    user.getFullName().toLowerCase().contains(name.toLowerCase())
-            );
-      }
+      matching = listUsersWithGivenNameAndFollowTrue(name, currentUser);
     } else {
-      if (name == null) {
-        //ignore current User // ask valyo
-        matching = userRepository.findAll(paging).stream().
-            filter(user -> !user.getUsername().equals(currentUser.getUsername()));
-      } else {
-        matching = userRepository.findByUsernameContainingIgnoreCase(name, paging).stream();
-      }
+      matching = listUserWithGivenNameAndFollowFalse(name, currentUser, paging);
     }
-
     return matching
         .sorted(Comparator
             .comparingLong(User::getGossipsCounter).reversed()
             .thenComparing(User::getUsername))
-        .skip((long) pageNo * pageSize)
-        .limit(pageSize)
+        .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+        .limit(pageable.getPageSize())
         .collect(Collectors.toList());
   }
 
-  //FIXME :remove following flag
+  public Stream<User> listUsersWithGivenNameAndFollowTrue(String username, User currentUser) {
+    Stream<User> matching;
+    if (username == null) {
+      matching = currentUser.getFriendList().stream();
+    } else {
+      matching = currentUser.getFriendList().stream()
+          .filter(user ->
+              user.getUsername().toLowerCase().contains(username.toLowerCase()) ||
+                  user.getFullName().toLowerCase().contains(username.toLowerCase())
+          );
+    }
+    return matching;
+  }
+
+  public Stream<User> listUserWithGivenNameAndFollowFalse(String username, User currentUser,
+      Pageable pageable) {
+    Stream<User> matching;
+    if (username == null) {
+      matching = userRepository.findAll(pageable).stream().
+          filter(user -> !user.getUsername().equals(currentUser.getUsername()));
+    } else {
+      matching = userRepository.findByUsernameContainingIgnoreCase(username, pageable).stream();
+    }
+    return matching;
+  }
+
   public User register(@NotEmpty String email, @Valid String fullName, @NotEmpty String username,
       @NotEmpty String password,
-      @NotEmpty String passwordConfirmation, boolean follow) {
+      @NotEmpty String passwordConfirmation) {
     if (!password.equals(passwordConfirmation)) {
       throw new IllegalArgumentException("The passwords doesn't match");
     }

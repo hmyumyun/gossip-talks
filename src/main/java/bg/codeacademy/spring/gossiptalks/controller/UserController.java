@@ -9,6 +9,8 @@ import java.util.Collection;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import retrofit2.http.Multipart;
 
 
 @RestController
@@ -43,21 +44,15 @@ public class UserController {
       @RequestParam(name = "f", defaultValue = "false") boolean follow, Principal principal) {
 
     User currentUser = userService.getGivenUser(principal.getName());
-
+    Pageable paging = PageRequest.of(pageNumber, pageSize);
     Collection<User> matching = userService
-        .listAllUsers(pageNumber, pageSize, name, follow, currentUser);
+        .listAllUsers(paging, name, follow, currentUser);
 
     return matching.stream()
-        // FIXME: reuse convertToUserResponse
-        .map(user -> new UserResponse()
-            .setEmail(user.getEmail())
-            .setUsername(user.getUsername())
-            .setName(user.getFullName())
-            .setFollowing(currentUser, user))
+        .map(user -> convertToUserResponse(user, (currentUser.getFriendList().contains(user))))
         .collect(Collectors.toList());
   }
 
-  @Multipart
   @PostMapping(value = "/users", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public User registerUser(
       @NotEmpty @Pattern(regexp = "^[a-z0-8\\\\.\\\\-]+$")
@@ -65,15 +60,14 @@ public class UserController {
       @RequestParam(name = "name", required = false) String name,
       @NotEmpty @Email @RequestParam(name = "email") String email,
       @NotEmpty @ValidPassword @RequestParam(name = "password") String password,
-      @NotEmpty @RequestParam(name = "passwordConfirmation") String passwordConfirmation,
-      @RequestParam(name = "following", required = false, defaultValue = "false") boolean following
+      @NotEmpty @RequestParam(name = "passwordConfirmation") String passwordConfirmation
+
   ) {
 
-    return userService.register(email, name, username, password, passwordConfirmation, following);
+    return userService.register(email, name, username, password, passwordConfirmation);
   }
 
 
-  @Multipart
   @PostMapping(value = "/users/{username}/follow", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public UserResponse followUser(@PathVariable("username") String username,
       @RequestParam(name = "follow") boolean follow,
@@ -89,7 +83,7 @@ public class UserController {
     return convertToUserResponse(user, false);
   }
 
-  @Multipart
+
   @PostMapping(value = "/users/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public UserResponse changePasswordCurrentUser(
       @NotEmpty @ValidPassword @RequestParam(name = "password") String password,//new password

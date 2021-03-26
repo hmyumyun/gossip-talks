@@ -4,7 +4,6 @@ import bg.codeacademy.spring.gossiptalks.validation.NoHtml;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -24,7 +23,7 @@ public class Gossip {
   // This create Many-to-One relation to User
   @ManyToOne
   @NotNull
-  private User user; // TODO: rename to author, creator, publisher
+  private User author;
 
 
   public long getId() {
@@ -50,12 +49,12 @@ public class Gossip {
     return this;
   }
 
-  public User getUser() {
-    return user;
+  public User getAuthor() {
+    return author;
   }
 
-  public Gossip setUser(User user) {
-    this.user = user;
+  public Gossip setAuthor(User author) {
+    this.author = author;
     return this;
   }
 
@@ -69,11 +68,11 @@ public class Gossip {
     }
     Gossip gossip = (Gossip) o;
     return id == gossip.id && content.equals(gossip.content) && dateTime.equals(gossip.dateTime)
-        && user.equals(gossip.user);
+        && author.equals(gossip.author);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, content, dateTime, user);
+    return Objects.hash(id, content, dateTime, author);
   }
 }
