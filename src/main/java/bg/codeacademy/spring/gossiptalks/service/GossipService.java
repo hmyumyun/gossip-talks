@@ -4,14 +4,9 @@ import bg.codeacademy.spring.gossiptalks.model.Gossip;
 import bg.codeacademy.spring.gossiptalks.model.User;
 import bg.codeacademy.spring.gossiptalks.repository.GossipRepository;
 import bg.codeacademy.spring.gossiptalks.repository.UserRepository;
-import bg.codeacademy.spring.gossiptalks.validation.NoHtml;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +26,7 @@ public class GossipService {
     Gossip gossip = new Gossip()
         .setContent(content)
         .setDateTime(OffsetDateTime.now())
-        .setUser(user);
+        .setAuthor(user);
     user.incrementGossipsCounter();
     userRepository.save(user);
     return gossipRepository.save(gossip);
@@ -44,9 +39,6 @@ public class GossipService {
   }
 
   public Page<Gossip> getAllGossipFromGivenUser(String username, Pageable pageable) {
-    // FIXME: remove duplicate pageable, leave Sort.b() declaration to controller
-    Pageable paging = PageRequest
-        .of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("dateTime").descending());
-    return gossipRepository.findByUserUsername(username, paging);
+    return gossipRepository.findByAuthorUsername(username, pageable);
   }
 }

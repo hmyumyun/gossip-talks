@@ -13,6 +13,9 @@ spring.h2.console.enabled: true
 ---
 spring.profiles: dev
 spring.datasource.url: "jdbc:h2:mem:./gossip-db"
+# debug sql
+spring.jpa.show-sql: true
+spring.jpa.properties.hibernate.format_sql: true
 # modify the web pages, without restarting the backend
 spring.resources.static-locations: "file:src/main/resources"
 

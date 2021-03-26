@@ -19,13 +19,6 @@ public class UserResponse {
     return email;
   }
 
-
-  // FIXME: don't mix domain models/dtos with logic
-  public UserResponse setFollowing(User current, User target) {
-    this.following = current.getFriendList().contains(target);
-    return this;
-  }
-
   public UserResponse setEmail(String email) {
     this.email = email;
     return this;
