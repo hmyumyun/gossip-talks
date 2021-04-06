@@ -14,7 +14,7 @@ public interface GossipRepository extends JpaRepository<Gossip, Long> {
 
   @Query(value = "SELECT * FROM GOSSIP g "
       + "WHERE g.Author_ID IN (SELECT FRIEND_LIST_ID "
-      + "FROM USER_FRIEND_LIST uf "
+      + "FROM USERS_TABLE_FRIEND_LIST uf "
       + "WHERE uf.USER_ID = :user_id) "
       + "ORDER BY g.DATE_TIME DESC", nativeQuery = true)
   Page<Gossip> findAllGossipsOfFriends(@Param("user_id") Long user_id, Pageable pageable);
