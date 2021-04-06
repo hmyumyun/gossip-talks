@@ -32,7 +32,7 @@ public class GossipResponse {
 
   //convert id to 36-base format
   public GossipResponse setIdFromGossipEntity(long id) {
-    this.id = Long.toString(id, 36);
+    this.id = Long.toString(id, 36).toUpperCase();
     return this;
   }
 

@@ -14,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
+@javax.persistence.Table(name = "users_table")
 public class User implements UserDetails {
 
   @Id
