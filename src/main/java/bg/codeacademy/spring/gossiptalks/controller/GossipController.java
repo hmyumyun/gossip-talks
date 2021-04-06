@@ -8,7 +8,6 @@ import bg.codeacademy.spring.gossiptalks.service.GossipService;
 import bg.codeacademy.spring.gossiptalks.service.UserService;
 import bg.codeacademy.spring.gossiptalks.validation.NoHtml;
 import java.security.Principal;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.constraints.Max;
@@ -81,7 +80,7 @@ public class GossipController {
         .setText(gossip.getContent())
         .setIdFromGossipEntity(gossip.getId())
         .setUsername(user.getUsername())
-        .setDatetime(OffsetDateTime.now());
+        .setDatetime(gossip.getDateTime());
   }
 
   public static GossipList toGossiplistDto(Pageable pageable, Page<Gossip> gossips) {
